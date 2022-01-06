@@ -1,17 +1,46 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom";
+import SeasonDisplay from "./SeasonDisplay";
+import LoadingDisplay from "./LoadingDisplay";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+class App extends React.Component {
+  state = { lat: null, errorMsg: ''}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  componentDidMount() {
+      window.navigator.geolocation.getCurrentPosition(
+          (position) => {
+              //To update object we called setState
+              this.setState({ lat: position.coords.latitude })
+          },
+          (err) => {
+              this.setState({ errorMsg: err.message })
+          }
+      );
+  }
+
+  componentDidUpdate() {
+  }
+
+  renderContent(){
+      if(this.state.errorMsg && !this.state.lat){
+          return <div>Error: {this.state.errorMsg}</div>
+      }
+      if (!this.state.errorMsg && this.state.lat){
+          return <SeasonDisplay lat={this.state.lat} />
+      }
+
+      return <LoadingDisplay message={"Please Accept Location Request"}/>
+  }
+
+  //Render has to be defined!
+  render(){
+      return(
+          <div>
+              {this.renderContent()}
+          </div>
+      )
+  }
+
+}
+
+ReactDOM.render(<App/>, document.querySelector("#root"));
